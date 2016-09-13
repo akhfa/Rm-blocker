@@ -6,7 +6,17 @@
 package blocker;
 
 import com.rabbitmq.client.*;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.Calendar;
+import java.util.Timer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 /**
  *
@@ -22,12 +32,12 @@ import java.io.IOException;
  *    6. routing key
  */
 public class Blocker {
-
+    public static int seconds;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] argv) throws Exception{
-        // TODO code application logic here
+        seconds = Integer.parseInt(argv[7]);
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(argv[0]);
         factory.setUsername(argv[2]);
@@ -50,9 +60,20 @@ public class Blocker {
                                      AMQP.BasicProperties properties, byte[] body) throws IOException {
             String message = new String(body, "UTF-8");
             System.out.println(" [x] Received '" + message + "'");
+              JSONParser parser = new JSONParser();
+              try {
+                    Object obj = parser.parse(message);
+                    JSONObject jobj = (JSONObject) obj;
+                    String IP = (String) jobj.get("clientip");
+                    System.out.println(IP);
+                    Thread t = new Thread(new BlockerThread(IP));
+                    t.start();
+              } catch (ParseException ex) {
+                  Logger.getLogger(Blocker.class.getName()).log(Level.SEVERE, null, ex);
+              }
           }
+          
         };
         channel.basicConsume(argv[5], true, consumer);
     }
-    
 }
