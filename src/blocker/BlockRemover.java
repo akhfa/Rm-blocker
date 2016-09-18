@@ -8,6 +8,7 @@ package blocker;
 import static blocker.Blocker.seconds;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.Calendar;
 import java.util.TimerTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -25,8 +26,9 @@ public class BlockRemover extends TimerTask {
     
     @Override
     public void run() {
-        System.out.println("exec iptables");
         this.executeCommand("ls -l");
+        Calendar calendar = Calendar.getInstance();
+        System.out.println("[" + calendar.getTime() + "] IP " + this.IP + " unblocked.");
 //        try {
 //            Thread.sleep((seconds + 1) * 1000);
 //        } catch (InterruptedException ex) {

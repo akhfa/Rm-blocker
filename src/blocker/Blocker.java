@@ -59,13 +59,11 @@ public class Blocker {
           public void handleDelivery(String consumerTag, Envelope envelope,
                                      AMQP.BasicProperties properties, byte[] body) throws IOException {
             String message = new String(body, "UTF-8");
-            System.out.println(" [x] Received '" + message + "'");
               JSONParser parser = new JSONParser();
               try {
                     Object obj = parser.parse(message);
                     JSONObject jobj = (JSONObject) obj;
                     String IP = (String) jobj.get("clientip");
-                    System.out.println(IP);
                     Thread t = new Thread(new BlockerThread(IP));
                     t.start();
               } catch (ParseException ex) {
