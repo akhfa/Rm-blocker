@@ -24,10 +24,6 @@ public class BlockRemover extends TimerTask {
         System.out.println(Command.executeCommand("ls -l"));
         Calendar calendar = Calendar.getInstance();
         System.out.println("[" + calendar.getTime() + "] IP " + this.IP + " unblocked.");
-//        try {
-//            Thread.sleep((seconds + 1) * 1000);
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(BlockRemover.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+//        Command.executeCommand("sed -i '/"+ this.IP +"/d' " + Blocker.dir);
     }
 }

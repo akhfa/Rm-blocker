@@ -33,8 +33,9 @@ import org.json.simple.parser.ParseException;
  */
 public class Blocker {
     public static int seconds;
+    public static String dir="/home/akhfa/.blocker/blockedIP";
     /**
-     * @param args the command line arguments
+     * @param argv
      */
     public static void main(String[] argv) throws Exception{
         seconds = Integer.parseInt(argv[7]);
@@ -59,16 +60,24 @@ public class Blocker {
           public void handleDelivery(String consumerTag, Envelope envelope,
                                      AMQP.BasicProperties properties, byte[] body) throws IOException {
             String message = new String(body, "UTF-8");
-              JSONParser parser = new JSONParser();
-              try {
-                    Object obj = parser.parse(message);
-                    JSONObject jobj = (JSONObject) obj;
-                    String IP = (String) jobj.get("clientip");
-                    Thread t = new Thread(new BlockerThread(IP));
-                    t.start();
-              } catch (ParseException ex) {
-                  Logger.getLogger(Blocker.class.getName()).log(Level.SEVERE, null, ex);
-              }
+            JSONParser parser = new JSONParser();
+            
+            Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+                public void uncaughtException(Thread th, Throwable ex) {
+                    System.out.println("Uncaught exception: " + ex);
+                }
+            };
+            
+            try {
+                Object obj = parser.parse(message);
+                JSONObject jobj = (JSONObject) obj;
+                String IP = (String) jobj.get("clientip");
+                Thread t = new Thread(new BlockerThread(IP));
+                t.setUncaughtExceptionHandler(h);
+                t.start();
+            } catch (ParseException ex) {
+                Logger.getLogger(Blocker.class.getName()).log(Level.SEVERE, null, ex);
+            }
           }
           
         };
