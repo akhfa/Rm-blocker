@@ -5,13 +5,8 @@
  */
 package blocker;
 
-import static blocker.Blocker.seconds;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.util.Calendar;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -26,7 +21,7 @@ public class BlockRemover extends TimerTask {
     
     @Override
     public void run() {
-        this.executeCommand("ls -l");
+        System.out.println(Command.executeCommand("ls -l"));
         Calendar calendar = Calendar.getInstance();
         System.out.println("[" + calendar.getTime() + "] IP " + this.IP + " unblocked.");
 //        try {
@@ -34,26 +29,5 @@ public class BlockRemover extends TimerTask {
 //        } catch (InterruptedException ex) {
 //            Logger.getLogger(BlockRemover.class.getName()).log(Level.SEVERE, null, ex);
 //        }
-    }
-    
-    private String executeCommand(String command) {
-        StringBuffer output = new StringBuffer();
-        Process p;
-        try {
-            p = Runtime.getRuntime().exec(command);
-            p.waitFor();
-            BufferedReader reader =
-                new BufferedReader(new InputStreamReader(p.getInputStream()));
-
-            String line = "";
-            while ((line = reader.readLine())!= null) {
-                    output.append(line + "\n");
-                    System.err.println(line);
-            }
-        } catch (Exception e) {
-                e.printStackTrace();
-        }
-//		return output.toString();
-        return "";
     }
 }
