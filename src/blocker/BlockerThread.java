@@ -19,6 +19,6 @@ public class BlockerThread implements Runnable{
     }
     @Override
     public void run() {
-        Command.executeCommand("bash /opt/blocker.sh " + this.IP + " " + seconds + "");
+        Command.executeCommand("bash /opt/blocker/blocker.sh " + this.IP + " " + seconds + "");
     }
 }
