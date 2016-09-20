@@ -34,6 +34,7 @@ import org.json.simple.parser.ParseException;
 public class Blocker {
     public static int seconds;
     public static String dir="/home/akhfa/.blocker/blockedIP";
+    public static String dbdir="/home/akhfa/.blocker/blocker.db";
     /**
      * @param argv
      */
@@ -63,6 +64,7 @@ public class Blocker {
             JSONParser parser = new JSONParser();
             
             Thread.UncaughtExceptionHandler h = new Thread.UncaughtExceptionHandler() {
+                @Override
                 public void uncaughtException(Thread th, Throwable ex) {
                     System.out.println("Uncaught exception: " + ex);
                 }

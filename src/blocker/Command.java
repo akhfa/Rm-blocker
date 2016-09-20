@@ -6,12 +6,12 @@
 package blocker;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  *
@@ -19,8 +19,10 @@ import java.io.InputStreamReader;
  */
 public class Command {
     public static String executeCommand(String cmdString) {
+        System.out.println(cmdString);
         StringBuffer output = new StringBuffer();
-        String [] cmd = {"bash", "-c", cmdString};
+//        String [] cmd = {"bash", "-c", cmdString};
+        String [] cmd = cmdString.split(" ");
         Process p;
         try {
             p = Runtime.getRuntime().exec(cmdString);
@@ -28,8 +30,11 @@ public class Command {
             BufferedReader reader =
                 new BufferedReader(new InputStreamReader(p.getInputStream()));
 
+            BufferedReader err =
+                new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            
             String line = "";
-            while ((line = reader.readLine())!= null) {
+            while ((line = err.readLine())!= null) {
                     output.append(line + "\n");
             }
         } catch (Exception e) {
@@ -37,48 +42,99 @@ public class Command {
         }
         return output.toString();
     }
-    public static void append (String dir, String text) throws IOException
+    public static void append (String text) throws IOException
     {
-        File file =new File(dir);
-        if(!file.exists()){
-            file.getParentFile().mkdirs();
-            file.createNewFile();
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:" + Blocker.dbdir);
+
+            stmt = c.createStatement();
+            String sql = "INSERT INTO IP " +
+                         " VALUES ("+ text +")"; 
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+          System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+          System.exit(0);
         }
-        
-        FileWriter fileWritter = new FileWriter(file.getAbsolutePath(),true);
-    	        BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
-    	        bufferWritter.write(text + "\n");
-    	        bufferWritter.close();
+    }
+    
+    public static void delete (String text)
+    {
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:" + Blocker.dbdir);
+
+            stmt = c.createStatement();
+            String sql = "DELETE FROM IP " +
+                         " WHERE IP = "+ text; 
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+          System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+          System.exit(0);
+        }
+    }
+    
+    public static void initDB()
+    {
+        Connection c = null;
+        Statement stmt = null;
+        try {
+            Class.forName("org.sqlite.JDBC");
+            c = DriverManager.getConnection("jdbc:sqlite:" + Blocker.dbdir);
+            System.out.println("Opened database successfully");
+
+            stmt = c.createStatement();
+            String sql = "CREATE TABLE IP " +
+                         "(ID INT PRIMARY KEY     NOT NULL," +
+                         " IP           CHAR(15)    NOT NULL)"; 
+            stmt.executeUpdate(sql);
+            stmt.close();
+            c.close();
+        } catch ( Exception e ) {
+          System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+          System.exit(0);
+        }
+        System.out.println("Table created successfully");
     }
     
     /**
-     * Menyamakan string pada file. Masih error.
+     * Menyamakan string pada file.
      * @param dir
      * @param patternString
      * @return 
      */
-    public static String grep (String dir, String patternString)
+    public static String grep (String patternString)
     {
-        BufferedReader br = null;
-        boolean found = false;
-        String resultString = "";
+        Connection c = null;
+        Statement stmt = null;
+        String result = "";
         try {
-            br = new BufferedReader(new FileReader(dir));
-            while ((resultString = br.readLine()) != null && !found) {
-                if(resultString.equals(patternString))
-                {
-                    found = true;
-                }
-            }
-        } catch (IOException e) {
-                e.printStackTrace();
-        } finally {
-            try {
-                    if (br != null)br.close();
-            } catch (IOException ex) {
-                    ex.printStackTrace();
-            }
+          Class.forName("org.sqlite.JDBC");
+          c = DriverManager.getConnection("jdbc:sqlite:" + Blocker.dbdir);
+          c.setAutoCommit(false);
+          System.out.println("Opened database successfully");
+
+          stmt = c.createStatement();
+          ResultSet rs = stmt.executeQuery( "SELECT * FROM IP WHERE IP = " + patternString + ";" );
+          while ( rs.next() ) {
+             result = rs.getString("IP");
+          }
+          rs.close();
+          stmt.close();
+          c.close();
+        } catch ( Exception e ) {
+          System.err.println( e.getClass().getName() + ": " + e.getMessage() );
+          System.exit(0);
         }
-        return resultString;
+        System.out.println("result = " + result);
+        return result;
     }
 }
