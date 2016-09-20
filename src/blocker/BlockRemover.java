@@ -5,8 +5,13 @@
  */
 package blocker;
 
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,7 +28,10 @@ public class BlockRemover extends TimerTask {
     public void run() {
         System.out.println(Command.executeCommand("ls -l"));
         Calendar calendar = Calendar.getInstance();
+        System.out.println(Command.executeCommand("iptables -D INPUT -s " + this.IP + " -j DROP"));
+        Command.delete(this.IP);
         System.out.println("[" + calendar.getTime() + "] IP " + this.IP + " unblocked.");
-//        Command.executeCommand("sed -i '/"+ this.IP +"/d' " + Blocker.dir);
+        
+//        System.out.println(Command.executeCommand("sed -i \"/"+ this.IP +"/d\" " + Blocker.dir));
     }
 }
