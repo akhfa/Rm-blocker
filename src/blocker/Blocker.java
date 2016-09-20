@@ -34,7 +34,6 @@ import org.json.simple.parser.ParseException;
 public class Blocker {
     public static int seconds;
     public static String dir="/home/akhfa/.blocker/blockedIP";
-    public static String dbdir="/home/akhfa/.blocker/blocker.db";
     /**
      * @param argv
      */
